@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Comment</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onSaveClick()">Save</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-item>
+    <ion-label position="stacked">Zone/Area<ion-text color="danger">*</ion-text></ion-label>
+    <ion-select value="0">
+      <ion-select-option value="0">Master Bathroom</ion-select-option>
+      <ion-select-option value="1">1st Floor Living Room</ion-select-option>
+      <ion-select-option value="2">2nd Floor Bedroom Room #1</ion-select-option>
+      <ion-select-option value="3">Main Hall</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Description<ion-text color="danger">*</ion-text></ion-label>
+    <ion-textarea rows="3"></ion-textarea>
+  </ion-item>
+
+  <ion-list-header lines="none">
+    <ion-label class="header">Photographs<ion-text color="danger">*</ion-text></ion-label>
+    <ion-button fill="clear" (click)="onAddPhotoClick()">Add</ion-button>
+  </ion-list-header>
+  <ion-row id="unitImageContainer" class="ion-padding-horizontal ion-justify-content-start">
+    <ion-col *ngFor="let photo of [1, 2, 3, 3, 3]" size="4">
+      <img src="//placehold.it/80">
+    </ion-col>
+  </ion-row>
+
+</ion-content>

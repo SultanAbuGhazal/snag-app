@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Snag List</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onNewCommentClick()">New</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div id="filterContainer">
+    <ion-item>
+      <ion-label position="stacked">Filter Comments</ion-label>
+      <ion-select value="0" (change)="onFilterChange()">
+        <ion-select-option value="0">Show All Zones</ion-select-option>
+        <ion-select-option value="1">1st Floor Living Room</ion-select-option>
+        <ion-select-option value="2">2nd Floor Bedroom Room #1</ion-select-option>
+        <ion-select-option value="3">Main Hall</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-list>
+    <ion-item *ngFor="let item of [1, 2, 3, 3, 3, 3]" class="snag-item" detail>
+      <ion-grid>
+        <ion-row class="ion-justify-content-start">
+          <ion-col size="12">
+            <ion-text class="comment-zone" color="medium">1st Floor Living Room</ion-text>
+            <p class="comment-text">This item is broken.</p>
+          </ion-col>
+          <ion-col *ngFor="let img of [1, 2, 3, 4, 5]" size="2">
+            <img src="//placehold.it/50">
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </ion-list>
+
+
+  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
+    <ion-fab-button color="medium" (click)="onNewCommentClick()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>
