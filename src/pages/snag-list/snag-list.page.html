@@ -15,11 +15,9 @@
   <div id="filterContainer">
     <ion-item>
       <ion-label position="stacked">Filter Comments</ion-label>
-      <ion-select value="0" (change)="onFilterChange()">
+      <ion-select value="0" (ionChange)="onFilterChange($event)">
         <ion-select-option value="0">Show All Zones</ion-select-option>
-        <ion-select-option value="1">1st Floor Living Room</ion-select-option>
-        <ion-select-option value="2">2nd Floor Bedroom Room #1</ion-select-option>
-        <ion-select-option value="3">Main Hall</ion-select-option>
+        <ion-select-option *ngFor="let x of zones" value="{{x.name}}">{{ x.name }}</ion-select-option>
       </ion-select>
     </ion-item>
   </div>

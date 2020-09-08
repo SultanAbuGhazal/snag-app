@@ -4,31 +4,31 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'projects',
+    redirectTo: 'reports',
     pathMatch: 'full'
   },
   {
-    path: 'projects',
-    loadChildren: () => import('../pages/projects/projects.module').then( m => m.ProjectsPageModule)
+    path: 'reports',
+    loadChildren: () => import('../pages/reports/reports.module').then( m => m.ProjectsPageModule)
   },
   {
-    path: 'new-project',
-    loadChildren: () => import('../pages/new-project/new-project.module').then( m => m.NewProjectPageModule)
+    path: 'new-report',
+    loadChildren: () => import('../pages/new-report/new-report.module').then( m => m.NewProjectPageModule)
   },
   {
-    path: 'project/:project_id/comment',
+    path: 'report/:report_id/comment',
     loadChildren: () => import('../pages/comment/comment.module').then( m => m.CommentPageModule)
   },
   {
-    path: 'project/:project_id/comment/:id',
+    path: 'report/:report_id/comment/:id',
     loadChildren: () => import('../pages/comment/comment.module').then( m => m.CommentPageModule)
   },
   {
-    path: 'project/:project_id/snag-list',
+    path: 'report/:report_id/snag-list',
     loadChildren: () => import('../pages/snag-list/snag-list.module').then( m => m.SnagListPageModule)
   },
   {
-    path: 'project/:project_id/report-preview',
+    path: 'report/:report_id/report-preview',
     loadChildren: () => import('../pages/report-preview/report-preview.module').then( m => m.ReportPreviewPageModule)
   }
 ];

@@ -15,7 +15,6 @@ import { DataService } from 'src/services/data/data.service';
 
 @NgModule({
   declarations: [AppComponent],
-  entryComponents: [],
   imports: [
     BrowserModule,
     IonicModule.forRoot(),

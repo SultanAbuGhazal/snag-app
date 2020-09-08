@@ -1,0 +1,146 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>New Project</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onSaveClick()">Save</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content>
+  
+  <form [formGroup]="form">
+  <!-- Project Details -->
+  <section>
+    <ion-list-header lines="full">
+      <ion-label class="header">Project Details</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label position="stacked">Project Name</ion-label>
+      <ion-input formControlName="name"></ion-input>
+    </ion-item>
+    <div class="validation-errors">
+      <ng-container *ngFor="let validation of validationMessages.name">
+        <div class="error-message" *ngIf="form.get('name').hasError(validation.type) && (form.get('name').dirty || form.get('name').touched)">
+          <ion-icon name="information-circle-outline"></ion-icon> {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+
+    <ion-item>
+      <ion-label position="stacked">Description</ion-label>
+      <ion-textarea rows="3" formControlName="description"></ion-textarea>
+    </ion-item>
+    <div class="validation-errors">
+      <ng-container *ngFor="let validation of validationMessages.description">
+        <div class="error-message" *ngIf="form.get('description').hasError(validation.type) && (form.get('description').dirty || form.get('description').touched)">
+          <ion-icon name="information-circle-outline"></ion-icon> {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+
+    <ion-item>
+      <ion-label position="stacked">Report Prepared For</ion-label>
+      <ion-input formControlName="prepared_for"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Inspection Carried By</ion-label>
+      <ion-input formControlName="inspected_by"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Inspection Carried On</ion-label>
+      <ion-datetime displayFormat="DD/MM/YYYY" formControlName="inspected_on"></ion-datetime>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Inspection Carried At</ion-label>
+      <ion-datetime displayFormat="hh:mm A" formControlName="inspected_at"></ion-datetime>
+    </ion-item>
+  </section>
+  
+
+  
+  <!-- Unit Details -->
+  <section>
+    <ion-list-header lines="full">
+      <ion-label class="header">Unit Details</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label position="stacked">Weather</ion-label>
+      <ion-select placeholder="Select One" formControlName="weather">
+        <ion-select-option *ngFor="let x of weatherList" value="{{x.value}}">{{ x.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Unit Identification Number</ion-label>
+      <ion-input formControlName="unit_reference"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Unit Type</ion-label>
+      <ion-select placeholder="Select One" formControlName="unit_type">
+        <ion-select-option *ngFor="let x of unitTypeList" value="{{x.value}}">{{ x.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    
+    <ion-item>
+      <ion-label position="stacked">Unit Age</ion-label>
+      <ion-select placeholder="Select One" formControlName="unit_age">
+        <ion-select-option *ngFor="let x of unitAgeList" value="{{x.value}}">{{ x.name }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </section>
+  
+
+  
+  <!-- Unit Photograph -->
+  <section>
+    <ion-list-header lines="none">
+      <ion-label class="header">Photograph<ion-text color="danger">*</ion-text></ion-label>
+      <ion-button fill="clear" (click)="onAddPhotoClick()">Add</ion-button>
+    </ion-list-header>
+    <ion-item lines="full">
+      <ion-row id="unitImageContainer" class="ion-padding-horizontal ion-justify-content-center">
+        <ion-col size="12" *ngIf="unitPhotoSrc">
+          <img [src]="unitPhotoSrc">
+        </ion-col>
+      </ion-row>
+    </ion-item>
+    <div class="validation-errors">
+      <ng-container *ngFor="let validation of validationMessages.unit_photo_uri">
+        <div class="error-message" *ngIf="form.get('unit_photo_uri').hasError(validation.type) && (form.get('unit_photo_uri').dirty || form.get('unit_photo_uri').touched)">
+          <ion-icon name="information-circle-outline"></ion-icon> {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+  </section>
+  
+
+  
+  <section>
+    <ion-list>
+      <ion-list-header lines="none">
+        <ion-label class="header">Zones/Areas</ion-label>
+      </ion-list-header>
+      <ion-item lines="full">
+        <ion-input #newZone placeholder="New Zone or Area"></ion-input>
+        <ion-button fill="clear" (click)="onAddZoneClick(newZone)">Add</ion-button>
+      </ion-item>
+      <ion-item *ngFor="let z of zones; let i = index" lines="full" style="border-left: 8px solid lightgrey;">
+        {{ z.name }}
+        <ion-button fill="clear" size="small" color="dangers" slot="end" (click)="onDeleteZoneClick(i)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-list>
+  </section>
+
+  </form>
+
+</ion-content>

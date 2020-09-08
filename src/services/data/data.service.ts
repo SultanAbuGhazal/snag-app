@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Platform } from '@ionic/angular';
-import { File } from '@ionic-native/file/ngx';
+import { File, DirectoryEntry } from '@ionic-native/file/ngx';
 import { MAIN_DIRECTORY_NAME as directory_name } from '../../environments/environment';
 
 @Injectable({
@@ -8,74 +8,100 @@ import { MAIN_DIRECTORY_NAME as directory_name } from '../../environments/enviro
 })
 export class DataService {
 
-  private mainDirectoryLocation: string = this.file.externalRootDirectory;
-  private mainDirectory: DirectoryEntry;
+  private root;
+  private mainPath: string;
+  private paths = {
+    reports: 'reports',
+    report: 'reports/:report',
+    report_info: 'info.json',
+    project_photo: 'project_photo.jpg'
+  };
 
   constructor(
     private platform: Platform,
     private file: File
   ) {
-
-  }
-
-  initialize(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      if (this.mainDirectory) resolve(this.mainDirectory);
-      else {
-        this.getMainDirectory().then(entry => {
-          this.mainDirectory = entry;
-          resolve(this.mainDirectory);
-        }, error => {
-          console.log(error);
-        });
-      }
+    this.platform.ready().then(_ => {
+      this.root = this.file.externalRootDirectory;
+      this.mainPath = this.file.externalRootDirectory.concat(directory_name);
     });
   }
 
 
-  getProjects(): Promise<any> {
+  getReports(): Promise<any> {
     var promise = new Promise((resolve, reject) => {
-        this.mainDirectory.getDirectory('projects', { create: false }, projectsEntry => {
-          console.log(projectsEntry);
-          this.file.listDir(this.mainDirectory.nativeURL, 'projects').then(x => {
-            console.log(x);
-          }, error => {
-            console.log(error);
-          });
-        }, error => {
-          console.log(error);
+      this.getReportsDirectory().then(entry => {
+        this.file.listDir(entry.nativeURL.replace("/"+entry.name, ""), entry.name).then(entries => {
+          resolve(entries.map(el => el.name));
         });
+      });
     });
 
     return promise;
+  }
+
+
+  getReport(id: string): Promise<any> {
+    return this.file.readAsText(this.mainPath.concat('/', this.paths.reports, '/', id), this.paths.report_info).then(f => {
+      return JSON.parse(f);
+    });
+  }
+
+
+  newReport(id: string, report: Object): Promise<any> {
+    var promise = new Promise((resolve, reject) => {
+      // create the project folder
+      this.file.createDir(this.mainPath.concat('/', this.paths.reports), id, true).then(entry => {
+        let photoName = report['unit_photo_uri'].substring(report['unit_photo_uri'].lastIndexOf('/') + 1);
+        let photoPath = report['unit_photo_uri'].substring(0, report['unit_photo_uri'].lastIndexOf('/') + 1);
+
+        // copy the project photo from the cache to report folder
+        this.file.moveFile(photoPath, photoName, entry.nativeURL, '').then(photoEntry => {
+          report['unit_photo_uri'] = photoEntry.nativeURL;
+          
+          // write the info.json file
+          this.file.writeFile(entry.nativeURL, this.paths.report_info, JSON.stringify(report)).then(_ => {
+            resolve();
+          }).catch(err => {
+            console.error("Failed to write json file!");
+            reject();
+          });
+        }).catch(err => {
+          console.error("Failed to move photo!");
+          reject();
+        });
+      }).catch(_ => {
+        console.error("Failed to create folder!");
+        reject();
+      });
+    });
+
+    return promise;
+  }
+
+
+  getImageSrcFromFileURI(uri): Promise<string> {
+    let filename = uri.substring(uri.lastIndexOf('/') + 1);
+    let path = uri.substring(0, uri.lastIndexOf('/') + 1);
+    return this.file.readAsDataURL(path, filename);
   }
 
 
   /** PRIVATE METHODS */
 
-  /**
-   * get the main directory if it exists,
-   * create it if it does not exist
-   */
-  private getMainDirectory(): Promise<any> {
-
-    var promise = new Promise((resolve, reject) => {
-
-      window.resolveLocalFileSystemURL(this.mainDirectoryLocation, (entry: DirectoryEntry) => {
-        entry.getDirectory(directory_name, { create: true }, entry => {
-          console.log("Main Directory Found!", entry.fullPath);
-          resolve(entry);
-        }, error => {
-          console.log(error);
-        });
-
-      }, error => {
-        console.log(error);
-      });
-
-    });
-
-    return promise;
+  private async getMainDirectory() {
+    var rootDirEntry = await this.file.resolveDirectoryUrl(this.root);
+    return this.file.getDirectory(rootDirEntry, directory_name, { create: true });
   }
+
+  private async getReportsDirectory() {
+    var mainDirEntry = await this.getMainDirectory();
+    return this.file.getDirectory(mainDirEntry, this.paths.reports, { create: true });
+  }
+
+  // private async getReportDirectory(name) {
+  //   var mainDirEntry = await this.getMainDirectory();
+  //   return this.file.getDirectory(mainDirEntry, this.paths.reports, { create: true });
+  // }
 
 }

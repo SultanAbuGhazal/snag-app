@@ -1,0 +1,24 @@
+<ion-card *ngIf="report">
+  <!-- <img [src]="unitPhotoSrc" /> -->
+  <div style="width: 100%; height: 120px; 
+      background-color: lightgrey;
+      background-image: url({{unitPhotoSrc}}); 
+      background-position: center; 
+      background-size: cover;"></div>
+  <ion-card-header>
+    <ion-card-subtitle>
+      <span *ngIf="report.inspected_on">{{ report.inspected_on | date: 'd/M/y' }}</span>
+      <span *ngIf="report.inspected_on && report.inspected_at">, </span>
+      <span *ngIf="report.inspected_at">{{ report.inspected_at | date: 'h:mm a' }}</span>
+    </ion-card-subtitle>
+    <ion-card-title>{{ report.name }}</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    {{ report.description | slice: 0-150 }}<span *ngIf="report.description.length > 150">...</span>
+    <div style="text-align: center; padding-top: 13px;">
+      <ion-button class="ion-no-margin" size="small" fill="clear" routerDirection="forward" [routerLink]="['/report', this.report.id, 'snag-list']">Snag List</ion-button>
+      <ion-button class="ion-no-margin" size="small" fill="clear" routerDirection="forward" [routerLink]="['/report', '1', 'report-preview']">Preview</ion-button>
+      <ion-button class="ion-no-margin" size="small" fill="clear" color="danger">Delete</ion-button>
+    </div>
+  </ion-card-content>
+</ion-card>

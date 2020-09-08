@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { Router, NavigationExtras } from '@angular/router';
+import { Router, NavigationExtras, ActivatedRoute } from '@angular/router';
+import { DataService } from 'src/services/data/data.service';
 
 @Component({
   selector: 'app-snag-list',
@@ -9,11 +10,22 @@ import { Router, NavigationExtras } from '@angular/router';
 })
 export class SnagListPage implements OnInit {
 
-  constructor(public alertController: AlertController, private router: Router) { }
+  report: any;
+  zones: any[];
+
+  constructor(
+    public alertController: AlertController, 
+    private data: DataService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
+    var id = this.route.snapshot.paramMap.get('report_id');
+    this.loadReport(id);
+  }
 
 
   ngOnInit() {
-    
+
   }
 
   onNewCommentClick() {
@@ -22,12 +34,19 @@ export class SnagListPage implements OnInit {
     });
   }
 
-  onFilterChange() {
-    
+  onFilterChange(event) {
+    console.log(event.detail.value);
   }
 
   
   /** PRIVATE METHODS */
+
+  private loadReport(id) {
+    this.data.getReport(id).then(report => {
+      this.report = report;
+      this.zones = JSON.parse(report['zones']);
+    });
+  }
 
   private navigateToNewCommentPage(selectedZone) {
     var extras: NavigationExtras = {
@@ -35,8 +54,8 @@ export class SnagListPage implements OnInit {
         zone: selectedZone
       }
     };
-    this.router.navigate(['/project', '1', 'comment'], extras);
-    // this.router.navigate(['/project', '1', 'comment']);
+    this.router.navigate(['/report', '1', 'comment'], extras);
+    // this.router.navigate(['/report', '1', 'comment']);
   }
 
   private getListOfZones(): any {
