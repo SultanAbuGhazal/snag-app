@@ -1,0 +1,13 @@
+<ion-item *ngIf="comment" class="snag-item" detail>
+  <ion-grid>
+    <ion-row class="ion-justify-content-start">
+      <ion-col size="12">
+        <ion-text class="comment-zone" color="medium">{{ comment.zone }}</ion-text>
+        <p class="comment-text">{{ comment.description }}</p>
+      </ion-col>
+      <ion-col *ngFor="let src of photographs" size="2">
+        <ion-img [src]="src"></ion-img>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-item>

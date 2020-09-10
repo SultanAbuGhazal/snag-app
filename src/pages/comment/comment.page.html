@@ -12,29 +12,45 @@
 
 <ion-content>
 
-  <ion-item>
+  <form [formGroup]="form">
+
+  <!-- comment zone -->
+  <ion-item [disabled]="true">
     <ion-label position="stacked">Zone/Area<ion-text color="danger">*</ion-text></ion-label>
-    <ion-select value="0">
-      <ion-select-option value="0">Master Bathroom</ion-select-option>
-      <ion-select-option value="1">1st Floor Living Room</ion-select-option>
-      <ion-select-option value="2">2nd Floor Bedroom Room #1</ion-select-option>
-      <ion-select-option value="3">Main Hall</ion-select-option>
+    <ion-select formControlName="zone">
+      <ion-select-option value="{{ zone.name }}">{{ zone.name }}</ion-select-option>
     </ion-select>
   </ion-item>
 
+  <!-- comment description -->
   <ion-item>
     <ion-label position="stacked">Description<ion-text color="danger">*</ion-text></ion-label>
-    <ion-textarea rows="3"></ion-textarea>
+    <ion-textarea rows="3" formControlName="description"></ion-textarea>
   </ion-item>
+  <div class="validation-errors">
+    <ng-container *ngFor="let validation of validationMessages.description">
+      <div class="error-message" *ngIf="form.get('description').hasError(validation.type) && (form.get('description').dirty || form.get('description').touched)">
+        <ion-icon name="information-circle-outline"></ion-icon> {{ validation.message }}
+      </div>
+    </ng-container>
+  </div>
 
+  <!-- comment photographs -->
   <ion-list-header lines="none">
     <ion-label class="header">Photographs<ion-text color="danger">*</ion-text></ion-label>
     <ion-button fill="clear" (click)="onAddPhotoClick()">Add</ion-button>
   </ion-list-header>
-  <ion-row id="unitImageContainer" class="ion-padding-horizontal ion-justify-content-start">
-    <ion-col *ngFor="let photo of [1, 2, 3, 3, 3]" size="4">
-      <img src="//placehold.it/80">
+  <ion-row id="commentPhotosContainer" class="ion-padding-horizontal ion-justify-content-start">
+    <!-- preview selected photographs -->
+    <ion-col *ngFor="let photo of photographsSrc" size="4">
+      <ion-img [src]="photo"></ion-img>
+      <ion-button fill="clear" color="danger" class="delete-button" (click)="onDeletePhotoClick(i)">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
     </ion-col>
   </ion-row>
+
+  </form>
+  <br>
 
 </ion-content>

@@ -4,25 +4,45 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Snag List</ion-title>
-    <ion-buttons slot="end">
+    <!-- <ion-buttons slot="end">
       <ion-button (click)="onNewCommentClick()">New</ion-button>
-    </ion-buttons>
+    </ion-buttons> -->
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
 
-  <div id="filterContainer">
+  <!-- comments filter by zone -->
+  <div *ngIf="report" id="filterContainer">
     <ion-item>
       <ion-label position="stacked">Filter Comments</ion-label>
       <ion-select value="0" (ionChange)="onFilterChange($event)">
         <ion-select-option value="0">Show All Zones</ion-select-option>
-        <ion-select-option *ngFor="let x of zones" value="{{x.name}}">{{ x.name }}</ion-select-option>
+        <ion-select-option *ngFor="let z of report.zones" value="{{z.name}}">{{ z.name }}</ion-select-option>
       </ion-select>
     </ion-item>
   </div>
 
-  <ion-list>
+  <!-- comments list -->
+  <ion-list *ngIf="currentComments && currentComments.length">
+    <app-comment *ngFor="let c of currentComments" [reportId]="report.id" [zone]="c.zone" [id]="c.id"></app-comment>
+  </ion-list>
+
+  <!-- loading -->
+  <div *ngIf="!currentComments" style="display:flex; flex-direction: column; justify-content:center; align-items:center; height:100%;">
+    <ion-spinner name="lines"></ion-spinner>
+  </div>
+
+  <!-- in the comments list is empty -->
+  <div *ngIf="currentComments && !currentComments.length" 
+    style="display:flex; flex-direction: column; justify-content:center; align-items:center; height:100%;">
+    <ion-text color="medium" class="ion-text-center">
+      <h1 style="margin-top: 0">Empty</h1>
+      <p>You don't have any comments yet!</p>
+    </ion-text>
+  </div>
+
+  <!-- <ion-list>
     <ion-item *ngFor="let item of [1, 2, 3, 3, 3, 3]" class="snag-item" detail>
       <ion-grid>
         <ion-row class="ion-justify-content-start">
@@ -36,7 +56,7 @@
         </ion-row>
       </ion-grid>
     </ion-item>
-  </ion-list>
+  </ion-list> -->
 
 
   <ion-fab vertical="bottom" horizontal="start" slot="fixed">

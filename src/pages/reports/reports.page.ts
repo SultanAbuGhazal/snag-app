@@ -32,7 +32,7 @@ export class ReportsPage implements OnInit {
     this.data.getReports().then(reports => {
       console.log(reports);
       
-      this.currentReports = reports;
+      this.currentReports = reports.reverse();
     });
   }
 

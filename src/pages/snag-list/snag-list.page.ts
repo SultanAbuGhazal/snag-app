@@ -10,8 +10,8 @@ import { DataService } from 'src/services/data/data.service';
 })
 export class SnagListPage implements OnInit {
 
+  currentComments: any[];
   report: any;
-  zones: any[];
 
   constructor(
     public alertController: AlertController, 
@@ -20,7 +20,9 @@ export class SnagListPage implements OnInit {
     private router: Router
   ) {
     var id = this.route.snapshot.paramMap.get('report_id');
-    this.loadReport(id);
+    this.loadReport(id).then(_ => {
+      this.loadComments();
+    });
   }
 
 
@@ -28,9 +30,18 @@ export class SnagListPage implements OnInit {
 
   }
 
+  ionViewDidEnter() {
+    if (this.report) {
+      this.loadComments();
+    }
+  }
+
   onNewCommentClick() {
-    this.presentAlert((x) => {
-      this.navigateToNewCommentPage(x);
+    this.presentAlert((zone) => {
+      var extras: NavigationExtras = {
+        state: { zone: zone }
+      };
+      this.router.navigate(['/report', this.report.id, 'comment'], extras);
     });
   }
 
@@ -42,57 +53,31 @@ export class SnagListPage implements OnInit {
   /** PRIVATE METHODS */
 
   private loadReport(id) {
-    this.data.getReport(id).then(report => {
+    return this.data.getReport(id).then(report => {
+      report['zones'] = JSON.parse(report['zones']);
       this.report = report;
-      this.zones = JSON.parse(report['zones']);
     });
   }
 
-  private navigateToNewCommentPage(selectedZone) {
-    var extras: NavigationExtras = {
-      state: {
-        zone: selectedZone
-      }
-    };
-    this.router.navigate(['/report', '1', 'comment'], extras);
-    // this.router.navigate(['/report', '1', 'comment']);
-  }
-
-  private getListOfZones(): any {
-    return [
-      {
-        name: 'radio1',
-        type: 'radio',
-        label: 'Bedroom #1',
-        value: 'value1',
-        checked: undefined
-      },
-      {
-        name: 'radio2',
-        type: 'radio',
-        label: 'Bedroom #2',
-        value: 'value2'
-      },
-      {
-        name: 'radio3',
-        type: 'radio',
-        label: 'Main Hall',
-        value: 'value3'
-      },
-      {
-        name: 'radio4',
-        type: 'radio',
-        label: 'Master Bathroom',
-        value: 'value4'
-      }
-    ];
+  private loadComments(zone = null) {
+    return this.data.getComments(this.report.id).then(comments => {
+      this.currentComments = comments;
+    });
   }
 
   private async presentAlert(selectHandler = null) {
     const alert = await this.alertController.create({
       cssClass: undefined,
       header: 'Select Zone/Area',
-      inputs: this.getListOfZones(),
+      inputs: this.report['zones'].map(el => {
+        return {
+          name: el.name,
+          type: 'radio',
+          label: el.name,
+          value: el,
+          checked: undefined
+        };
+      }),
       buttons: [
         {
           text: 'Cancel',

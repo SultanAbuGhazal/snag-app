@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { SnagListPageRoutingModule } from './snag-list-routing.module';
 
 import { SnagListPage } from './snag-list.page';
+import { CommentComponent } from 'src/components/comment/comment.component';
 
 @NgModule({
   imports: [
@@ -15,6 +16,12 @@ import { SnagListPage } from './snag-list.page';
     IonicModule,
     SnagListPageRoutingModule
   ],
-  declarations: [SnagListPage]
+  entryComponents: [
+    CommentComponent
+  ],
+  declarations: [
+    SnagListPage,
+    CommentComponent
+  ]
 })
 export class SnagListPageModule {}

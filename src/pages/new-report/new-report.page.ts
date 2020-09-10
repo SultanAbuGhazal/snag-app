@@ -128,7 +128,7 @@ export class NewReportPage implements OnInit {
 
 
 
-  private async openCamera(source = this.camera.MediaType.PICTURE) {
+  private async openCamera() {
     const options: CameraOptions = {
       quality: 100,
       sourceType: null,

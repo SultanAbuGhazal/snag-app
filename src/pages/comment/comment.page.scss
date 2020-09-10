@@ -1,7 +1,7 @@
-#unitImageContainer {
+#commentPhotosContainer {
     text-align: center;
     
-    img {
+    ion-img {
         border-radius: 5px;
         width: 100%;
         height: auto;
@@ -10,4 +10,15 @@
     ion-col {
         padding: 0px 2px;
     }
+}
+
+.delete-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    --padding-end: 0;
+    --padding-start: 5px;
+    --padding-top: 0;
+    --padding-bottom: 0;
 }
