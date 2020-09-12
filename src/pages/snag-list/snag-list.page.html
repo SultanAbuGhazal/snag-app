@@ -16,8 +16,8 @@
   <div *ngIf="report" id="filterContainer">
     <ion-item>
       <ion-label position="stacked">Filter Comments</ion-label>
-      <ion-select value="0" (ionChange)="onFilterChange($event)">
-        <ion-select-option value="0">Show All Zones</ion-select-option>
+      <ion-select value="all" (ionChange)="onFilterChange($event)">
+        <ion-select-option value="all">Show All Zones</ion-select-option>
         <ion-select-option *ngFor="let z of report.zones" value="{{z.name}}">{{ z.name }}</ion-select-option>
       </ion-select>
     </ion-item>

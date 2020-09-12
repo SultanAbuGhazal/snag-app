@@ -18,7 +18,7 @@
   <ion-item [disabled]="true">
     <ion-label position="stacked">Zone/Area<ion-text color="danger">*</ion-text></ion-label>
     <ion-select formControlName="zone">
-      <ion-select-option value="{{ zone.name }}">{{ zone.name }}</ion-select-option>
+      <ion-select-option>{{ form.value.zone }}</ion-select-option>
     </ion-select>
   </ion-item>
 
@@ -43,7 +43,8 @@
   <ion-row id="commentPhotosContainer" class="ion-padding-horizontal ion-justify-content-start">
     <!-- preview selected photographs -->
     <ion-col *ngFor="let photo of photographsSrc" size="4">
-      <ion-img [src]="photo"></ion-img>
+      <!-- <ion-img [src]="photo"></ion-img> -->
+      <ion-img [src]="file:///storage/emulated/0/SnagReport/reports/my_first_project_1597/comments/Bathroom/1/1599916390178.jpg"></ion-img>
       <ion-button fill="clear" color="danger" class="delete-button" (click)="onDeletePhotoClick(i)">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>

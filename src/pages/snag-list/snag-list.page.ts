@@ -46,7 +46,12 @@ export class SnagListPage implements OnInit {
   }
 
   onFilterChange(event) {
-    console.log(event.detail.value);
+    if (event.detail.value == "all") {
+      this.loadComments();
+    } else {
+      let zone = event.detail.value;
+      this.loadComments(zone);
+    }
   }
 
   
@@ -60,7 +65,7 @@ export class SnagListPage implements OnInit {
   }
 
   private loadComments(zone = null) {
-    return this.data.getComments(this.report.id).then(comments => {
+    return this.data.getComments(this.report.id, zone).then(comments => {
       this.currentComments = comments;
     });
   }

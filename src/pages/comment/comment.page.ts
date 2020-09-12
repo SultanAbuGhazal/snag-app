@@ -14,12 +14,16 @@ export class CommentPage implements OnInit {
 
   form: FormGroup;
   validationMessages: any = null;
-  photographs: any[] = [];
-  photographsSrc: any[] = [];
   editMode: boolean = false;
+
   reportId: string;
   commentId: string;
+
+  comment: any;
   zone: any;
+
+  photographs: any[] = [];
+  photographsSrc: any[] = [];
 
   constructor(
     public actionSheetController: ActionSheetController,
@@ -33,16 +37,40 @@ export class CommentPage implements OnInit {
     this.reportId = this.route.snapshot.paramMap.get('report_id');
     this.commentId = this.route.snapshot.paramMap.get('comment_id');
     var extras = this.router.getCurrentNavigation().extras;
-    this.zone = extras.state.zone;
 
-    if (this.commentId) {
+    if (this.commentId) { // Editing mode
       this.editMode = true;
+      this.comment = extras.state.comment;
+      console.log("Open in Editing Mode.");
+    } else {
+      this.zone = extras.state.zone;
     }
   }
 
 
   ngOnInit() {
-    this.buildForm();
+    if (this.editMode) {
+      this.buildForm();
+      // prepare the form with current values
+      this.form.setValue({
+        id: this.comment.id,
+        zone: this.comment.zone,
+        description: this.comment.description,
+        photographs: JSON.stringify(this.comment.photographs),
+      }); 
+      // load the photographs
+      this.photographs = this.comment.photographs;
+      this.photographs.forEach(uri => {
+        this.data.getImageSrcFromFileURI(uri).then(src => {
+          console.log("Image URI:", uri);
+          console.log("Image SRC:", src);
+          
+          this.photographsSrc.push(src);
+        });
+      });
+    } else {
+      this.buildForm(this.zone.name);
+    }
   }
 
   onAddPhotoClick() {
@@ -80,7 +108,7 @@ export class CommentPage implements OnInit {
 
   /** PRIVATE METHODS */
 
-  private buildForm() {
+  private buildForm(zoneName = null) {
     this.validationMessages = {
       'zone': [
         { type: 'required', message: 'This is required.' }
@@ -93,7 +121,8 @@ export class CommentPage implements OnInit {
       ]
     };
     this.form = this.formBuilder.group({
-      zone: new FormControl(this.zone.name, Validators.required),
+      id: new FormControl(null),
+      zone: new FormControl(zoneName, Validators.required),
       description: new FormControl("This is the first comment.", Validators.required),
       photographs: new FormControl(null, Validators.required)
     });
@@ -104,8 +133,8 @@ export class CommentPage implements OnInit {
   private saveComment() {
     return new Promise((resolve, reject) => {
       this.data.getNextCommentId(this.reportId).then(nextId => {
+        this.form.get('id').setValue(nextId);
         var comment = this.form.value;
-        comment['id'] = nextId;
 
         this.data.newComment(this.reportId, comment.zone, comment['id'], comment).then(_ => {
           this.presentActionSheet();
