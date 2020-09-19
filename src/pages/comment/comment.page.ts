@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActionSheetController, NavController, AlertController } from '@ionic/angular';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 import { Router } from '@angular/router';
-import { File, DirectoryEntry } from '@ionic-native/file/ngx';
+import { File, DirectoryEntry, Entry } from '@ionic-native/file/ngx';
 import { Validators, FormControl, FormBuilder, FormGroup } from '@angular/forms';
 import { DataService } from 'src/services/data/data.service';
 
@@ -59,12 +59,12 @@ export class CommentPage implements OnInit {
     if (this.editMode) {
       // prepare the form with current values
       this.loadComment().then(comment => {
-        form.setValue({
-          id: comment.id,
-          zone: comment.zone,
-          description: comment.description,
-          photographs: comment.photographs,
-        });
+        // fill the form with current values
+        for (const field in form.value) {
+          if (comment.hasOwnProperty(field)) {
+            form.get(field).setValue(comment[field]);
+          }
+        }
         // load the photographs
         comment.photographs.forEach(uri => {
           this.addPhotograph(uri, true);

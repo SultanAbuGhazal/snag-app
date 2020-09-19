@@ -108,14 +108,14 @@
     </ion-list-header>
     <ion-item lines="full">
       <ion-row id="unitImageContainer" class="ion-padding-horizontal ion-justify-content-center">
-        <ion-col size="12" *ngIf="unitPhotoSrc">
-          <img [src]="unitPhotoSrc">
+        <ion-col size="12" *ngIf="coverPhotograph">
+          <img [src]="coverPhotograph.src">
         </ion-col>
       </ion-row>
     </ion-item>
     <div class="validation-errors">
-      <ng-container *ngFor="let validation of validationMessages.unit_photo_uri">
-        <div class="error-message" *ngIf="form.get('unit_photo_uri').hasError(validation.type) && (form.get('unit_photo_uri').dirty || form.get('unit_photo_uri').touched)">
+      <ng-container *ngFor="let validation of validationMessages.cover_photo_uri">
+        <div class="error-message" *ngIf="form.get('cover_photo_uri').hasError(validation.type) && (form.get('cover_photo_uri').dirty || form.get('cover_photo_uri').touched)">
           <ion-icon name="information-circle-outline"></ion-icon> {{ validation.message }}
         </div>
       </ng-container>
@@ -140,6 +140,13 @@
         </ion-button>
       </ion-item>
     </ion-list>
+    <div class="validation-errors">
+      <ng-container *ngFor="let validation of validationMessages.zones">
+        <div class="error-message" *ngIf="form.get('zones').hasError(validation.type) && (form.get('zones').dirty || form.get('zones').touched)">
+          <ion-icon name="information-circle-outline"></ion-icon> {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
   </section>
 
   </form>

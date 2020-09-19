@@ -17,7 +17,7 @@
     <ion-item [disabled]="!zonesDirectories">
       <ion-label position="stacked">Filter Comments</ion-label>
       <ion-select value="all" (ionChange)="onFilterChange($event)">
-        <ion-select-option value="all">Show All Zones</ion-select-option>
+        <ion-select-option value="all">Show All Comments</ion-select-option>
         <ion-select-option *ngFor="let z of zonesDirectories" [value]="z">{{ z.name }}</ion-select-option>
       </ion-select>
     </ion-item>

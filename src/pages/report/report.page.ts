@@ -23,9 +23,7 @@ export class ReportPage implements OnInit {
   reportDirectory: DirectoryEntry;
   report: any;
 
-  unitPhotoSrc: string; // ?
-
-  zones: Array<any> = [];
+  coverPhotograph: {uri: string, src: any};
   weatherList: Array<any> = WEATHER;
   unitAgeList: Array<any> = UNIT_AGE;
   unitTypeList: Array<any> = UNIT_TYPE;
@@ -62,10 +60,11 @@ export class ReportPage implements OnInit {
         // fill the form with current values
         for (const field in form.value) {
           if (report.hasOwnProperty(field)) {
-            console.log(field);
             form.get(field).setValue(report[field]);
           }
         }
+        // load the cover photograph
+        this.setCoverPhotograph(report['cover_photo_uri']);
       });
     }
   }
@@ -85,11 +84,8 @@ export class ReportPage implements OnInit {
 
 
   onAddPhotoClick() {
-    this.openCamera().then(imageURI => {
-      this.data.getImageSrcFromFileURI(imageURI).then(src => {
-        this.unitPhotoSrc = src;
-        this.form.get('unit_photo_uri').setValue(imageURI);
-      });
+    this.openCamera().then((imageURI: string) => {
+      this.setCoverPhotograph(imageURI);
     }).catch(_ => {
       // no image selected
     });
@@ -121,14 +117,22 @@ export class ReportPage implements OnInit {
 
 
   onSaveClick() {
-    console.log("Save:", this.form.value);
     if (this.form.valid) {
       var report = this.form.value;
-      report['id'] = this.generateProjectId(this.form.value.name);
-      
-      this.saveReport(report).then(_ => {
-        this.nav.back();
-      });
+      // update if the page is open in editing mode
+      if (this.editMode) {
+        this.updateReport(report).then(_ => {
+          this.nav.back();
+        });
+
+      // save as a new report
+      } else {
+        report['id'] = this.generateProjectId(this.form.value.name);
+        
+        this.saveReport(report).then(_ => {
+          this.nav.back();
+        });
+      }
     } else {
       this.validateAllFormFields(this.form);
     }
@@ -142,35 +146,77 @@ export class ReportPage implements OnInit {
   private loadReport() {
     return this.file.readAsText(this.reportDirectory.nativeURL, 'info.json').then(f => {
       this.report = JSON.parse(f);
-      console.log("Loaded report", this.report);
+      console.log("Loaded Report", this.report);
       return this.report;
     });
   }
 
   
 
-  private updateReport() {
+  private async updateReport(report) {
+    var promises = [];
+    if (this.reportDirectory) {
 
+      // first; save the cover photograph
+      var photoURI = report['cover_photo_uri'];
+      var photoPath = photoURI.substring(0, photoURI.lastIndexOf('/') + 1);
+
+      if (photoPath != this.reportDirectory.nativeURL) { // if the cover photograph has been changed
+        var photoName = photoURI.substring(photoURI.lastIndexOf('/') + 1);
+        report['cover_photo_uri'] = this.reportDirectory.nativeURL + "cover.jpg";
+
+        promises.push(
+          this.file.moveFile(photoPath, photoName, this.reportDirectory.nativeURL, "cover.jpg")
+        );
+      }
+      
+      // second; update the report info
+      promises.push(
+        this.file.writeExistingFile(this.reportDirectory.nativeURL, 'info.json', JSON.stringify(report))
+      );
+
+      // third; update the zones folders
+      var zonesDirectories = await this.file.listDir(this.reportDirectory.nativeURL, 'comments');
+      var currentZones = zonesDirectories.filter(el => el.isDirectory).map(z => z.name);
+      var newZones = report['zones'].map(z => z.name);
+
+      // --- check if any of the current zones is deleted and delete it's folder
+      currentZones.forEach(zoneName => {
+        if (newZones.indexOf(zoneName) == -1) { // if not found among the new zones list
+          promises.push(
+            this.file.removeRecursively(this.reportDirectory.nativeURL + 'comments', zoneName)
+          );
+        }
+      });
+
+      // --- check if any new zones were create and create folders for them
+      newZones.forEach(zoneName => {
+        if(currentZones.indexOf(zoneName) == -1) { // if not found among existing zones
+          promises.push(
+            this.file.createDir(this.reportDirectory.nativeURL + 'comments', zoneName, false)
+          );
+        }
+      });
+
+    }
+
+    return Promise.all(promises);
   }
 
 
 
-  private saveReport(report) {
-    return new Promise(async (resolve, reject) => {
-      var reportDirectory = await this.createReportDirectory(report.id, report['zones']);
-      let photoURI = report['unit_photo_uri'];
-      let photoName = photoURI.substring(photoURI.lastIndexOf('/') + 1);
-      let photoPath = photoURI.substring(0, photoURI.lastIndexOf('/') + 1);
+  private async saveReport(report) {
+    var reportDirectory = await this.createReportDirectory(report.id, report['zones']);
+    let photoURI = report['cover_photo_uri'];
+    let photoName = photoURI.substring(photoURI.lastIndexOf('/') + 1);
+    let photoPath = photoURI.substring(0, photoURI.lastIndexOf('/') + 1);
+    report['cover_photo_uri'] = reportDirectory.nativeURL + "cover.jpg";
 
-      Promise.all([
-        this.file.writeFile(reportDirectory.nativeURL, 'info.json', JSON.stringify(report)),
-        this.file.moveFile(photoPath, photoName, reportDirectory.nativeURL, "cover.jpg")
-      ]).then(_ => {
-        resolve();
-      }).catch(errors => {
-        console.error("Failed to save report!", errors);
-        reject();
-      });
+    return Promise.all([
+      this.file.writeFile(reportDirectory.nativeURL, 'info.json', JSON.stringify(report)),
+      this.file.moveFile(photoPath, photoName, reportDirectory.nativeURL, "cover.jpg")
+    ]).catch(errors => {
+      console.error("Failed to save report!", errors);
     });
   }
 
@@ -242,11 +288,15 @@ export class ReportPage implements OnInit {
       'description': [
         { type: 'required', message: 'This is required.' }
       ],
-      'unit_photo_uri': [
+      'cover_photo_uri': [
         { type: 'required', message: 'This is required.' }
+      ],
+      'zones': [
+        { type: 'required', message: 'There should be at least 1 zone.' }
       ]
     };
     this.form = this.formBuilder.group({
+      id: new FormControl(null),
       name: new FormControl(null, Validators.compose([
         Validators.required,
         Validators.pattern('[a-zA-Z0-9 ]*')
@@ -260,8 +310,8 @@ export class ReportPage implements OnInit {
       unit_reference: new FormControl(null),
       unit_type: new FormControl(null),
       unit_age: new FormControl(null),
-      unit_photo_uri: new FormControl(null, Validators.required),
-      zones: new FormControl(null)
+      cover_photo_uri: new FormControl(null, Validators.required),
+      zones: new FormControl(null, Validators.required)
     });
 
     return this.form;
@@ -328,20 +378,38 @@ export class ReportPage implements OnInit {
   
   
   private addZone(zoneName: string) {
-    this.zones.unshift({
+    let zones = this.form.get('zones').value;
+    if (!zones) zones = [];
+
+    zones.unshift({
       name: zoneName.trim()
     });
-    this.form.get('zones').setValue(this.zones);
+    this.form.get('zones').setValue(zones);
+  }
+
+
+
+  private setCoverPhotograph(uri: string) {
+    this.data.getImageSrcFromFileURI(uri).then(src => {
+      this.coverPhotograph = {
+        uri: uri,
+        src: src
+      };
+      this.form.get('cover_photo_uri').setValue(uri);
+    });
   }
 
 
 
   private removeZone(index) {
-    this.zones.splice(index, 1);
-    if (this.zones.length) {
-      this.form.get('zones').setValue(this.zones);
-    } else {
-      this.form.get('zones').reset();
+    let zones = this.form.get('zones').value;
+    if (zones) {
+      zones.splice(index, 1);
+      if (zones.length) {
+        this.form.get('zones').setValue(zones);
+      } else {
+        this.form.get('zones').reset();
+      }
     }
   }
 

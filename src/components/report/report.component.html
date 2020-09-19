@@ -19,7 +19,7 @@
     </ion-card-header>
   
     <!-- report card content -->
-    <ion-card-content>
+    <ion-card-content *ngIf="report.description">
       {{ report.description | slice: 0-150 }}<span *ngIf="report.description.length > 150">...</span>
     </ion-card-content>
 

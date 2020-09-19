@@ -58,33 +58,35 @@ export class SnagListPage implements OnInit {
   }
 
   onFilterChange(event) {
-    console.log(event.detail.value);
-    
-    // if (event.detail.value == "all") {
-    //   this.loadComments();
-    // } else {
-    //   let zone = event.detail.value;
-    //   this.loadComments(zone);
-    // }
+    if (event.detail.value == "all") {
+      this.loadComments();
+    } else {
+      let zone = event.detail.value;
+      this.loadComments(zone);
+    }
   }
 
   
   /** PRIVATE METHODS */
 
-  private loadComments(zone = null) {
-    this.file.listDir(this.reportDirectory.nativeURL, 'comments').then(zonesDirectories => {
-      if (zone) {
-        zonesDirectories = zonesDirectories.filter(el => el.name == zone);
-      }
+  private loadComments(zone: DirectoryEntry = null) {
+    if (zone) {
       this.currentComments = [];
-      zonesDirectories.forEach(dir => {
-        if (dir.isDirectory) {
-          this.file.listDir(this.reportDirectory.nativeURL + 'comments', dir.name).then(commentsDirectories => {
-            this.currentComments = this.currentComments.concat(commentsDirectories.reverse());
-          });
-        }
+      this.file.listDir(this.reportDirectory.nativeURL + 'comments', zone.name).then(commentsDirectories => {
+        this.currentComments = this.currentComments.concat(commentsDirectories.reverse());
       });
-    });
+    } else {
+      this.file.listDir(this.reportDirectory.nativeURL, 'comments').then(zonesDirectories => {
+        this.currentComments = [];
+        zonesDirectories.forEach(dir => {
+          if (dir.isDirectory) {
+            this.file.listDir(this.reportDirectory.nativeURL + 'comments', dir.name).then(commentsDirectories => {
+              this.currentComments = this.currentComments.concat(commentsDirectories.reverse());
+            });
+          }
+        });
+      });
+    }
   }
 
   private async presentAlert(selectHandler = null) {
