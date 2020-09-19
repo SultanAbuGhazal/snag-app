@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { Router, NavigationExtras, ActivatedRoute } from '@angular/router';
+import { File, DirectoryEntry } from '@ionic-native/file/ngx';
+import { Router, NavigationExtras } from '@angular/router';
 import { DataService } from 'src/services/data/data.service';
 
 @Component({
@@ -11,18 +12,24 @@ import { DataService } from 'src/services/data/data.service';
 export class SnagListPage implements OnInit {
 
   currentComments: any[];
+  reportDirectory: DirectoryEntry;
+  zonesDirectories: DirectoryEntry[];
   report: any;
 
   constructor(
     public alertController: AlertController, 
     private data: DataService,
-    private route: ActivatedRoute,
+    private file: File,
     private router: Router
   ) {
-    var id = this.route.snapshot.paramMap.get('report_id');
-    this.loadReport(id).then(_ => {
-      this.loadComments();
-    });
+    var extras = this.router.getCurrentNavigation().extras;
+    this.reportDirectory = extras.state.directory;
+
+    // this.file.getDirectory(this.reportDirectory, 'comments', {create: true}).then(entry => {
+      this.file.listDir(this.reportDirectory.nativeURL, 'comments').then(entries => {
+        this.zonesDirectories = entries.filter(el => el.isDirectory) as DirectoryEntry[];
+      });
+    // });
   }
 
 
@@ -31,42 +38,52 @@ export class SnagListPage implements OnInit {
   }
 
   ionViewDidEnter() {
-    if (this.report) {
-      this.loadComments();
-    }
+    this.loadComments();
   }
 
   onNewCommentClick() {
-    this.presentAlert((zone) => {
+    this.presentAlert(async (zoneDirectory) => {
+      var commentsDirectory = await this.file.resolveDirectoryUrl(this.reportDirectory.nativeURL + 'comments');
+      var lastIdFile = await this.file.getFile(commentsDirectory, 'last_comment_id.txt', {create: false});
+      
       var extras: NavigationExtras = {
-        state: { zone: zone }
+        state: {
+          commentDirectory: null,
+          zoneDirectory: zoneDirectory,
+          lastIdFile: lastIdFile 
+        }
       };
-      this.router.navigate(['/report', this.report.id, 'comment'], extras);
+      this.router.navigate(['comment'], extras);
     });
   }
 
   onFilterChange(event) {
-    if (event.detail.value == "all") {
-      this.loadComments();
-    } else {
-      let zone = event.detail.value;
-      this.loadComments(zone);
-    }
+    console.log(event.detail.value);
+    
+    // if (event.detail.value == "all") {
+    //   this.loadComments();
+    // } else {
+    //   let zone = event.detail.value;
+    //   this.loadComments(zone);
+    // }
   }
 
   
   /** PRIVATE METHODS */
 
-  private loadReport(id) {
-    return this.data.getReport(id).then(report => {
-      report['zones'] = JSON.parse(report['zones']);
-      this.report = report;
-    });
-  }
-
   private loadComments(zone = null) {
-    return this.data.getComments(this.report.id, zone).then(comments => {
-      this.currentComments = comments;
+    this.file.listDir(this.reportDirectory.nativeURL, 'comments').then(zonesDirectories => {
+      if (zone) {
+        zonesDirectories = zonesDirectories.filter(el => el.name == zone);
+      }
+      this.currentComments = [];
+      zonesDirectories.forEach(dir => {
+        if (dir.isDirectory) {
+          this.file.listDir(this.reportDirectory.nativeURL + 'comments', dir.name).then(commentsDirectories => {
+            this.currentComments = this.currentComments.concat(commentsDirectories.reverse());
+          });
+        }
+      });
     });
   }
 
@@ -74,7 +91,7 @@ export class SnagListPage implements OnInit {
     const alert = await this.alertController.create({
       cssClass: undefined,
       header: 'Select Zone/Area',
-      inputs: this.report['zones'].map(el => {
+      inputs: this.zonesDirectories.map(el => {
         return {
           name: el.name,
           type: 'radio',

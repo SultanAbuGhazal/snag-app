@@ -12,23 +12,19 @@ const routes: Routes = [
     loadChildren: () => import('../pages/reports/reports.module').then( m => m.ProjectsPageModule)
   },
   {
-    path: 'new-report',
-    loadChildren: () => import('../pages/new-report/new-report.module').then( m => m.NewProjectPageModule)
+    path: 'report',
+    loadChildren: () => import('../pages/report/report.module').then( m => m.NewProjectPageModule)
   },
   {
-    path: 'report/:report_id/comment',
+    path: 'comment',
     loadChildren: () => import('../pages/comment/comment.module').then( m => m.CommentPageModule)
   },
   {
-    path: 'report/:report_id/comment/:comment_id',
-    loadChildren: () => import('../pages/comment/comment.module').then( m => m.CommentPageModule)
-  },
-  {
-    path: 'report/:report_id/snag-list',
+    path: 'snag-list',
     loadChildren: () => import('../pages/snag-list/snag-list.module').then( m => m.SnagListPageModule)
   },
   {
-    path: 'report/:report_id/report-preview',
+    path: 'report-preview',
     loadChildren: () => import('../pages/report-preview/report-preview.module').then( m => m.ReportPreviewPageModule)
   }
 ];

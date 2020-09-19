@@ -1,6 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { DataService } from 'src/services/data/data.service';
-import { Platform,  } from '@ionic/angular';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { File, DirectoryEntry } from '@ionic-native/file/ngx';
 import { Router, NavigationExtras } from '@angular/router';
 
 @Component({
@@ -10,45 +9,55 @@ import { Router, NavigationExtras } from '@angular/router';
 })
 export class CommentComponent implements OnInit {
 
-  @Input() id: string;
-  @Input() zone: string;
-  @Input() reportId: string;
+  @Input('directory') commentDirectory: DirectoryEntry;
+  // @Input() id: string;
+  // @Input() zone: any;
+  // @Input() report: any;
+  @ViewChild('commentItem', {static: true}) commentItem: ElementRef;
+  observer: any;
   comment: any;
   photographs: string[] = [];
 
   constructor(
-    private platform: Platform,
     private router: Router,
-    private data: DataService
+    private file: File
   ) {
-    this.platform.ready().then(_ => {
-      this.loadComment();
-    });
+    var options = {
+      rootMargin: '0px',
+      threshold: 0
+    }
+    
+    this.observer = new IntersectionObserver((entry, obs) => {
+      if(entry[0].isIntersecting) {
+        obs.unobserve(this.commentItem['el']);
+        this.loadComment();
+      }
+    }, options);
   }
 
   ngOnInit() {
-    
+    // delaying the observer to skip the first intersection
+    setTimeout(() => {
+      this.observer.observe(this.commentItem['el']);
+    }, 200);
   }
 
   onCommentClick() {
-    console.log("Comment:", this.comment);
     var extras: NavigationExtras = {
-      state: { comment: this.comment }
+      state: { 
+        commentDirectory: this.commentDirectory
+      }
     };
-    this.router.navigate(['/report', this.reportId, 'comment', this.comment.id], extras);
+    this.router.navigate(['comment'], extras);
   }
 
 
   /** PRIVATE METHODS */
 
   private loadComment() {
-    this.data.getComment(this.reportId, this.zone, this.id).then(comment => {
-      // for (let i = 0; i < comment['photographs'].length; i++) {
-      //   this.data.getImageSrcFromFileURI(comment['photographs'][i]).then(src => {
-      //     this.photographs.push(src);
-      //   });
-      // }
-      this.comment = comment;
+    this.file.readAsText(this.commentDirectory.nativeURL, 'details.json').then(f => {
+      this.comment = JSON.parse(f);
+      console.log("Loaded Comment:", this.comment.id);
     });
   }
 

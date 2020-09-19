@@ -3,7 +3,8 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Comment</ion-title>
+    <ion-title *ngIf="editMode">Edit Comment</ion-title>
+    <ion-title *ngIf="!editMode">New Comment</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="onSaveClick()">Save</ion-button>
     </ion-buttons>
@@ -15,7 +16,7 @@
   <form [formGroup]="form">
 
   <!-- comment zone -->
-  <ion-item [disabled]="true">
+  <ion-item *ngIf="form.value.zone" [disabled]="true">
     <ion-label position="stacked">Zone/Area<ion-text color="danger">*</ion-text></ion-label>
     <ion-select formControlName="zone">
       <ion-select-option>{{ form.value.zone }}</ion-select-option>
@@ -42,9 +43,8 @@
   </ion-list-header>
   <ion-row id="commentPhotosContainer" class="ion-padding-horizontal ion-justify-content-start">
     <!-- preview selected photographs -->
-    <ion-col *ngFor="let photo of photographsSrc" size="4">
-      <!-- <ion-img [src]="photo"></ion-img> -->
-      <ion-img [src]="file:///storage/emulated/0/SnagReport/reports/my_first_project_1597/comments/Bathroom/1/1599916390178.jpg"></ion-img>
+    <ion-col *ngFor="let photo of photographs; let i = index" size="4">
+      <ion-img [src]="photo.src"></ion-img>
       <ion-button fill="clear" color="danger" class="delete-button" (click)="onDeletePhotoClick(i)">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>
@@ -55,3 +55,7 @@
   <br>
 
 </ion-content>
+
+<ion-footer *ngIf="editMode" class="ion-no-border">
+  <ion-button color="danger" fill="clear" expand="block" size="large" (click)="onDeleteClick()">DELETE</ion-button>
+</ion-footer>

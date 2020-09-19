@@ -1,23 +1,46 @@
-<ion-card *ngIf="report">
+<ion-card #reportCard>
+  
+  <!-- report photograph -->
   <div style="width: 100%; height: 120px; 
       background-color: lightgrey;
       background-image: url({{unitPhotoSrc}}); 
       background-position: center; 
       background-size: cover;"></div>
-  <ion-card-header>
-    <ion-card-subtitle>
-      <span *ngIf="report.inspected_on">{{ report.inspected_on | date: 'd/M/y' }}</span>
-      <span *ngIf="report.inspected_on && report.inspected_at">, </span>
-      <span *ngIf="report.inspected_at">{{ report.inspected_at | date: 'h:mm a' }}</span>
-    </ion-card-subtitle>
-    <ion-card-title>{{ report.name }}</ion-card-title>
-  </ion-card-header>
-  <ion-card-content>
-    {{ report.description | slice: 0-150 }}<span *ngIf="report.description.length > 150">...</span>
-    <div style="text-align: center; padding-top: 13px;">
-      <ion-button class="ion-no-margin" size="small" fill="clear" routerDirection="forward" [routerLink]="['/report', this.report.id, 'snag-list']">Snag List</ion-button>
-      <ion-button class="ion-no-margin" size="small" fill="clear" routerDirection="forward" [routerLink]="['/report', this.report.id, 'report-preview']">Preview</ion-button>
-      <ion-button class="ion-no-margin" size="small" fill="clear" color="danger">Delete</ion-button>
+
+  <div *ngIf="report">
+    <!-- report card header -->
+    <ion-card-header>
+      <ion-card-subtitle>
+        <span *ngIf="report.inspected_on">{{ report.inspected_on | date: 'd/M/y' }}</span>
+        <span *ngIf="report.inspected_on && report.inspected_at">, </span>
+        <span *ngIf="report.inspected_at">{{ report.inspected_at | date: 'h:mm a' }}</span>
+      </ion-card-subtitle>
+      <ion-card-title>{{ report.name }}</ion-card-title>
+    </ion-card-header>
+  
+    <!-- report card content -->
+    <ion-card-content>
+      {{ report.description | slice: 0-150 }}<span *ngIf="report.description.length > 150">...</span>
+    </ion-card-content>
+
+    <div style="padding: 0 5px 10px 5px">
+      <ion-button class="ion-no-margin" size="small" fill="clear" (click)="onSnagListClick()">Snag List</ion-button>
+      <ion-button class="ion-no-margin" size="small" fill="clear" (click)="onReportPreviewClick()">Preview</ion-button>
+      <ion-button class="ion-no-margin ion-float-right" size="small" fill="clear" (click)="onEditReportClick()">Edit</ion-button>
     </div>
-  </ion-card-content>
+  </div>
+
+  <!-- skeletons -->
+  <div *ngIf="!report">
+    <ion-card-header>
+      <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 95%"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 40%"></ion-skeleton-text>
+    </ion-card-content>
+  </div>
+  
 </ion-card>

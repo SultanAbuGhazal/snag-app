@@ -13,19 +13,20 @@
 <ion-content>
 
   <!-- comments filter by zone -->
-  <div *ngIf="report" id="filterContainer">
-    <ion-item>
+  <div id="filterContainer">
+    <ion-item [disabled]="!zonesDirectories">
       <ion-label position="stacked">Filter Comments</ion-label>
       <ion-select value="all" (ionChange)="onFilterChange($event)">
         <ion-select-option value="all">Show All Zones</ion-select-option>
-        <ion-select-option *ngFor="let z of report.zones" value="{{z.name}}">{{ z.name }}</ion-select-option>
+        <ion-select-option *ngFor="let z of zonesDirectories" [value]="z">{{ z.name }}</ion-select-option>
       </ion-select>
     </ion-item>
   </div>
 
   <!-- comments list -->
   <ion-list *ngIf="currentComments && currentComments.length">
-    <app-comment *ngFor="let c of currentComments" [reportId]="report.id" [zone]="c.zone" [id]="c.id"></app-comment>
+    <!-- <app-comment *ngFor="let c of currentComments" [report]="report" [zone]="c.zone" [id]="c.id"></app-comment> -->
+    <app-comment *ngFor="let c of currentComments" [directory]="c"></app-comment>
   </ion-list>
 
   <!-- loading -->
@@ -41,22 +42,6 @@
       <p>You don't have any comments yet!</p>
     </ion-text>
   </div>
-
-  <!-- <ion-list>
-    <ion-item *ngFor="let item of [1, 2, 3, 3, 3, 3]" class="snag-item" detail>
-      <ion-grid>
-        <ion-row class="ion-justify-content-start">
-          <ion-col size="12">
-            <ion-text class="comment-zone" color="medium">1st Floor Living Room</ion-text>
-            <p class="comment-text">This item is broken.</p>
-          </ion-col>
-          <ion-col *ngFor="let img of [1, 2, 3, 4, 5]" size="2">
-            <img src="//placehold.it/50">
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-item>
-  </ion-list> -->
 
 
   <ion-fab vertical="bottom" horizontal="start" slot="fixed">

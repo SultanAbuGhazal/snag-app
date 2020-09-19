@@ -3,7 +3,8 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>New Project</ion-title>
+    <ion-title *ngIf="editMode">Edit Report</ion-title>
+    <ion-title *ngIf="!editMode">New Report</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="onSaveClick()">Save</ion-button>
     </ion-buttons>
@@ -132,7 +133,7 @@
         <ion-input #newZone placeholder="New Zone or Area"></ion-input>
         <ion-button fill="clear" (click)="onAddZoneClick(newZone)">Add</ion-button>
       </ion-item>
-      <ion-item *ngFor="let z of zones; let i = index" lines="full" style="border-left: 8px solid lightgrey;">
+      <ion-item *ngFor="let z of form.value.zones; let i = index" lines="full" style="border-left: 8px solid lightgrey;">
         {{ z.name }}
         <ion-button fill="clear" size="small" color="dangers" slot="end" (click)="onDeleteZoneClick(i)">
           <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
@@ -142,5 +143,10 @@
   </section>
 
   </form>
+
+  <!-- delete button -->
+  <ion-button *ngIf="editMode" color="danger" fill="clear" expand="block" size="large" (click)="onDeleteClick()">
+    Delete
+  </ion-button>
 
 </ion-content>

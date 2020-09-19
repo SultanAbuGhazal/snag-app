@@ -4,13 +4,19 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Reports</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onReloadClick()">
+        <ion-icon slot="icon-only" name="reload"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 
-<ion-content fullscreen>
-
-  <app-report *ngFor="let p of currentReports" [id]="p"></app-report>
+<ion-content>
+  
+  <app-report *ngFor="let p of currentReports" [directory]="p"></app-report>
+  <div *ngIf="currentReports && currentReports.length" style="padding: 33px;"><!-- spacer --></div>
 
   <!-- loading -->
   <div *ngIf="!currentReports" style="display:flex; flex-direction: column; justify-content:center; align-items:center; height:100%;">
@@ -27,7 +33,7 @@
   </div>
 
   <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-    <ion-fab-button color="medium" routerDirection="forward" [routerLink]="['/new-report']">
+    <ion-fab-button color="medium" (click)="onNewReportClick()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { ReportPreviewPageRoutingModule } from './report-preview-routing.module';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 import { ReportPreviewPage } from './report-preview.page';
 
@@ -13,7 +14,8 @@ import { ReportPreviewPage } from './report-preview.page';
     CommonModule,
     FormsModule,
     IonicModule,
-    ReportPreviewPageRoutingModule
+    ReportPreviewPageRoutingModule,
+    PdfViewerModule
   ],
   declarations: [ReportPreviewPage]
 })

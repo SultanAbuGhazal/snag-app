@@ -4,9 +4,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { NewReportPageRoutingModule } from './new-report-routing.module';
+import { ReportPageRoutingModule } from './report-routing.module';
 
-import { NewReportPage } from './new-report.page';
+import { ReportPage } from './report.page';
 
 @NgModule({
   imports: [
@@ -14,8 +14,8 @@ import { NewReportPage } from './new-report.page';
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    NewReportPageRoutingModule
+    ReportPageRoutingModule
   ],
-  declarations: [NewReportPage]
+  declarations: [ReportPage]
 })
 export class NewProjectPageModule {}

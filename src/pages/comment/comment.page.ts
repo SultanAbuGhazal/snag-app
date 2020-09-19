@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActionSheetController, NavController } from '@ionic/angular';
+import { ActionSheetController, NavController, AlertController } from '@ionic/angular';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
+import { File, DirectoryEntry } from '@ionic-native/file/ngx';
 import { Validators, FormControl, FormBuilder, FormGroup } from '@angular/forms';
 import { DataService } from 'src/services/data/data.service';
 
@@ -16,82 +17,120 @@ export class CommentPage implements OnInit {
   validationMessages: any = null;
   editMode: boolean = false;
 
-  reportId: string;
-  commentId: string;
-
+  zoneDirectory: DirectoryEntry;
+  commentDirectory: DirectoryEntry;
+  lastCommentIdFile: Entry;
   comment: any;
-  zone: any;
 
-  photographs: any[] = [];
-  photographsSrc: any[] = [];
+  photographs: {uri: string, src: any, existing: boolean}[] = [];
+  removedPhotographs: string[] = [];
 
   constructor(
+    public alertController: AlertController,
     public actionSheetController: ActionSheetController,
     private formBuilder: FormBuilder, 
     private data: DataService,
+    private file: File,
     private camera: Camera, 
-    private route: ActivatedRoute,
     private nav: NavController,
     private router: Router
   ) {
-    this.reportId = this.route.snapshot.paramMap.get('report_id');
-    this.commentId = this.route.snapshot.paramMap.get('comment_id');
     var extras = this.router.getCurrentNavigation().extras;
+    
+    if (extras.state.lastIdFile) {
+      this.lastCommentIdFile = extras.state.lastIdFile;
+    }
 
-    if (this.commentId) { // Editing mode
-      this.editMode = true;
-      this.comment = extras.state.comment;
+    if (extras.state.zoneDirectory) {
+      this.zoneDirectory = extras.state.zoneDirectory;
+    }
+
+    if (extras.state.commentDirectory) { // editing mode
       console.log("Open in Editing Mode.");
-    } else {
-      this.zone = extras.state.zone;
+      this.editMode = true;
+      this.commentDirectory = extras.state.commentDirectory;
     }
   }
 
 
   ngOnInit() {
+    var form = this.buildForm();
+    
     if (this.editMode) {
-      this.buildForm();
       // prepare the form with current values
-      this.form.setValue({
-        id: this.comment.id,
-        zone: this.comment.zone,
-        description: this.comment.description,
-        photographs: JSON.stringify(this.comment.photographs),
-      }); 
-      // load the photographs
-      this.photographs = this.comment.photographs;
-      this.photographs.forEach(uri => {
-        this.data.getImageSrcFromFileURI(uri).then(src => {
-          console.log("Image URI:", uri);
-          console.log("Image SRC:", src);
-          
-          this.photographsSrc.push(src);
+      this.loadComment().then(comment => {
+        form.setValue({
+          id: comment.id,
+          zone: comment.zone,
+          description: comment.description,
+          photographs: comment.photographs,
+        });
+        // load the photographs
+        comment.photographs.forEach(uri => {
+          this.addPhotograph(uri, true);
         });
       });
     } else {
-      this.buildForm(this.zone.name);
+      form.get('zone').setValue(this.zoneDirectory.name);
     }
   }
 
+
+
   onAddPhotoClick() {
-    this.openCamera().then(imageURI => {
-      this.photographs.push(imageURI);
-      this.form.get('photographs').setValue(JSON.stringify(this.photographs));
-      this.data.getImageSrcFromFileURI(imageURI).then(src => {
-        this.photographsSrc.push(src);
-      });
+    this.openCamera().then((imageURI: string) => {
+      this.addPhotograph(imageURI);
     }).catch(_ => {
       // no image selected
     });
   }
 
+
+
+  onDeletePhotoClick(index) {
+    this.removePhotograph(index);
+  }
+
+
+
+  onDeleteClick() {
+    this.alertController.create({
+      header: 'Delete Comment',
+      message: 'Are you sure you want to delete this comment?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        }, {
+          text: 'Yes',
+          handler: () => {
+            this.deleteComment().then(_ => {
+              this.nav.back();
+            });
+          }
+        }
+      ]
+    }).then(alert => {
+      alert.present();
+    });
+  }
+
+
+
   onSaveClick() {
-    if (this.form.valid) {
-      this.saveComment().then(_ => {
-        this.form.reset({zone: this.zone.name});
-        this.photographs = [];
-        this.photographsSrc = [];
-      });
+    if (this.form.valid) {      
+      if (this.editMode) {
+        this.updateComment(this.commentDirectory, this.form.value).then(_ => {
+          this.nav.back();
+        });
+      } else {
+        this.saveComment(this.form.value).then(_ => {
+          this.presentActionSheet();
+          this.form.reset({zone: this.zoneDirectory.name});
+          this.photographs = [];
+          this.removedPhotographs = [];
+        });
+      }
     } else {
       this.validateAllFormFields(this.form);
     }
@@ -99,16 +138,41 @@ export class CommentPage implements OnInit {
 
 
 
-  onDeletePhotoClick(index) {
-    this.photographs.splice(index, 1);
-    this.form.get('photographs').setValue(JSON.stringify(this.photographs));
-  }
-
-
-
   /** PRIVATE METHODS */
 
-  private buildForm(zoneName = null) {
+  private loadComment() {
+    return this.file.readAsText(this.commentDirectory.nativeURL, 'details.json').then(f => {
+      this.comment = JSON.parse(f);
+      console.log("Loaded comment", this.comment);
+      return this.comment;
+    });
+  }
+
+  private addPhotograph(uri: string, existing: boolean = false) {
+    this.data.getImageSrcFromFileURI(uri).then(src => {
+      this.photographs.push({
+        uri: uri,
+        src: src,
+        existing: existing
+      });
+      this.form.get('photographs').setValue(this.photographs.map(el => el.uri));
+    });
+  }
+
+  private removePhotograph(index) {
+    if (this.editMode) {
+      this.removedPhotographs.push(this.photographs[index].uri);
+    }
+    this.photographs.splice(index, 1);
+
+    if (this.photographs.length) {
+      this.form.get('photographs').setValue(this.photographs.map(el => el.uri));
+    } else {
+      this.form.get('photographs').reset();
+    }
+  }
+
+  private buildForm() {
     this.validationMessages = {
       'zone': [
         { type: 'required', message: 'This is required.' }
@@ -122,25 +186,121 @@ export class CommentPage implements OnInit {
     };
     this.form = this.formBuilder.group({
       id: new FormControl(null),
-      zone: new FormControl(zoneName, Validators.required),
-      description: new FormControl("This is the first comment.", Validators.required),
+      zone: new FormControl(null, Validators.required),
+      description: new FormControl(null, Validators.required),
       photographs: new FormControl(null, Validators.required)
+    });
+
+    return this.form;
+  }
+
+
+
+  private updateComment(directory: DirectoryEntry, comment: any) {
+    return new Promise(async (resolve, reject) => {
+      let photosToBeSaved = this.photographs.filter(el => !el.existing).map(el => el.uri);
+      this.savePhotographs(directory, photosToBeSaved).then((entries: any) => {
+        comment.photographs = this.photographs.filter(el => el.existing).map(el => el.uri);
+        if (entries) {
+          comment.photographs = comment.photographs.concat(entries.map(el => el.nativeURL));
+        }
+
+        Promise.all([
+          this.file.writeExistingFile(directory.nativeURL, 'details.json', comment),
+          this.deletePhotographs(this.removedPhotographs)
+        ]).then(resolve).catch(errors => {
+          console.error("Failed to save comment!", errors);
+          reject();
+        });
+      }).catch(reject);
     });
   }
 
 
 
-  private saveComment() {
-    return new Promise((resolve, reject) => {
-      this.data.getNextCommentId(this.reportId).then(nextId => {
-        this.form.get('id').setValue(nextId);
-        var comment = this.form.value;
+  private saveComment(comment) {
+    return new Promise(async (resolve, reject) => {
+      comment.id = await this.getNextCommentId();
+      var commentDirectory = await this.file.getDirectory(this.zoneDirectory, comment.id.toString(), {create: true});
 
-        this.data.newComment(this.reportId, comment.zone, comment['id'], comment).then(_ => {
-          this.presentActionSheet();
-          resolve();
+      this.savePhotographs(commentDirectory, comment.photographs).then((entries: any) => {
+        comment.photographs = entries.map(el => el.nativeURL);
+        this.file.writeFile(commentDirectory.nativeURL, 'details.json', comment).then(resolve).catch(errors => {
+          console.error("Failed to save comment!", errors);
+          reject();
         });
       });
+    });
+  }
+
+
+
+  private savePhotographs(distination: DirectoryEntry, photos: string[]) {
+    var promises = photos.map(el => {
+      var name = el.substring(el.lastIndexOf('/') + 1);
+      var path = el.substring(0, el.lastIndexOf('/') + 1);
+      var newPath = distination.nativeURL;
+      return this.file.moveFile(path, name, newPath, '');
+    });
+
+    return Promise.all(promises).catch(err => {
+      console.error("Failed to save all new photos!", err);
+    });
+  }
+
+
+
+  private deletePhotographs(photos: string[]) {
+    // this will return a promise that resolves 
+    // when an array of promise resolves
+    return Promise.all(photos.map(el => {
+      var name = el.substring(el.lastIndexOf('/') + 1);
+      var path = el.substring(0, el.lastIndexOf('/') + 1);
+      return this.file.removeFile(path, name);
+    })).catch(err => {
+      console.error("Failed to delete all removed photos!", err);
+    });
+  }
+
+
+
+  private deleteComment() {
+    if (this.editMode) {
+      var folder = this.commentDirectory.nativeURL;
+      if (folder.endsWith('/')) {
+        folder = folder.substring(0, folder.length - 1);
+      }
+      var path = folder.substring(0, folder.lastIndexOf('/') + 1);
+      
+      return this.file.removeRecursively(path, this.commentDirectory.name).catch(err => {
+        console.error("Failed to delete comment!", err);
+      });
+    }
+  }
+
+
+
+  /**
+   * Reads the next comment ID from a file 
+   * and write the next ID to same file
+   */
+  private getNextCommentId() {
+    return new Promise((resolve, reject) => {
+      if (this.lastCommentIdFile) {
+        // this part reads the numbder stored in the file
+        var path = this.lastCommentIdFile.nativeURL;
+        var parent = path.substring(0, path.lastIndexOf('/') + 1);
+        this.file.readAsText(parent, this.lastCommentIdFile.name).then(t => {
+          // this part writes the next number to the same file
+          var lastCommmentId = parseInt(t);
+          var nextCommmentId = lastCommmentId + 1;
+          this.file.writeExistingFile(parent, this.lastCommentIdFile.name, nextCommmentId.toString()).then(_ => {
+            resolve(nextCommmentId);
+          }).catch(reject);
+        }).catch(reject);
+      } else {
+        reject();
+      }
     });
   }
 

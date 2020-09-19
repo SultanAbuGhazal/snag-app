@@ -15,27 +15,12 @@ section {
     text-align: center;
     width: 100%;
     margin: 10px 0 5px 0;
-    // border-radius: 5px;
-    // background-color: rgb(228, 227, 227);
-    // background-color: white;
-    // border-color: lightgrey;
-    // border-style: dashed;
-    // border-width: 1px;
 
     img {
         border-radius: 5px;
         width: 100%;
         height: auto;
     }
-
-    ion-col {
-        // margin: 0;
-        // padding: 0;
-    }
-}
-
-ion-item {
-    --padding-top: 10px;
 }
 
 .error-message {
