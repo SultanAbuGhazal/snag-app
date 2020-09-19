@@ -10,7 +10,7 @@ export const WEATHER = [
 ];
 
 
-export const UNIT_TYPE = [
+export const PROPERTY_TYPE = [
     {
         value: "villa",
         name: "Villa"
@@ -22,7 +22,7 @@ export const UNIT_TYPE = [
 ];
 
 
-export const UNIT_AGE = [
+export const PROPERTY_AGE = [
     {
         value: "0-1",
         name: "0 to 1 years"

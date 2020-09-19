@@ -34,7 +34,7 @@
     </div>
 
     <ion-item>
-      <ion-label position="stacked">Description</ion-label>
+      <ion-label position="stacked">Property Description</ion-label>
       <ion-textarea rows="3" formControlName="description"></ion-textarea>
     </ion-item>
     <div class="validation-errors">
@@ -65,10 +65,10 @@
   
 
   
-  <!-- Unit Details -->
+  <!-- Property Details -->
   <section>
     <ion-list-header lines="full">
-      <ion-label class="header">Unit Details</ion-label>
+      <ion-label class="header">Property Details</ion-label>
     </ion-list-header>
 
     <ion-item>
@@ -79,35 +79,35 @@
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Unit Identification Number</ion-label>
-      <ion-input formControlName="unit_reference"></ion-input>
+      <ion-label position="stacked">Property Identification Number</ion-label>
+      <ion-input formControlName="property_reference"></ion-input>
     </ion-item>
 
     <ion-item>
-      <ion-label position="stacked">Unit Type</ion-label>
-      <ion-select placeholder="Select One" formControlName="unit_type">
-        <ion-select-option *ngFor="let x of unitTypeList" value="{{x.value}}">{{ x.name }}</ion-select-option>
+      <ion-label position="stacked">Property Type</ion-label>
+      <ion-select placeholder="Select One" formControlName="property_type">
+        <ion-select-option *ngFor="let x of propertyTypeList" value="{{x.value}}">{{ x.name }}</ion-select-option>
       </ion-select>
     </ion-item>
     
     <ion-item>
-      <ion-label position="stacked">Unit Age</ion-label>
-      <ion-select placeholder="Select One" formControlName="unit_age">
-        <ion-select-option *ngFor="let x of unitAgeList" value="{{x.value}}">{{ x.name }}</ion-select-option>
+      <ion-label position="stacked">Property Age</ion-label>
+      <ion-select placeholder="Select One" formControlName="property_age">
+        <ion-select-option *ngFor="let x of propertyAgeList" value="{{x.value}}">{{ x.name }}</ion-select-option>
       </ion-select>
     </ion-item>
   </section>
   
 
   
-  <!-- Unit Photograph -->
+  <!-- Property Photograph -->
   <section>
     <ion-list-header lines="none">
       <ion-label class="header">Photograph<ion-text color="danger">*</ion-text></ion-label>
       <ion-button fill="clear" (click)="onAddPhotoClick()">Add</ion-button>
     </ion-list-header>
     <ion-item lines="full">
-      <ion-row id="unitImageContainer" class="ion-padding-horizontal ion-justify-content-center">
+      <ion-row id="propertyImageContainer" class="ion-padding-horizontal ion-justify-content-center">
         <ion-col size="12" *ngIf="coverPhotograph">
           <img [src]="coverPhotograph.src">
         </ion-col>

@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms'
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 import { ActionSheetController, NavController, AlertController } from '@ionic/angular';
 import { File, DirectoryEntry } from '@ionic-native/file/ngx';
-import { WEATHER, UNIT_TYPE, UNIT_AGE } from 'src/data/lists';
+import { WEATHER, PROPERTY_TYPE, PROPERTY_AGE } from 'src/data/lists';
 import { DataService } from 'src/services/data/data.service';
 import { Router } from '@angular/router';
 
@@ -25,8 +25,8 @@ export class ReportPage implements OnInit {
 
   coverPhotograph: {uri: string, src: any};
   weatherList: Array<any> = WEATHER;
-  unitAgeList: Array<any> = UNIT_AGE;
-  unitTypeList: Array<any> = UNIT_TYPE;
+  propertyAgeList: Array<any> = PROPERTY_AGE;
+  propertyTypeList: Array<any> = PROPERTY_TYPE;
 
   constructor(
     public alertController: AlertController,
@@ -307,9 +307,9 @@ export class ReportPage implements OnInit {
       inspected_on: new FormControl(null),
       inspected_at: new FormControl(null),
       weather: new FormControl(null),
-      unit_reference: new FormControl(null),
-      unit_type: new FormControl(null),
-      unit_age: new FormControl(null),
+      property_reference: new FormControl(null),
+      property_type: new FormControl(null),
+      property_age: new FormControl(null),
       cover_photo_uri: new FormControl(null, Validators.required),
       zones: new FormControl(null, Validators.required)
     });
