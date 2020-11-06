@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { File, DirectoryEntry } from '@ionic-native/file/ngx';
 import { DataService } from 'src/services/data/data.service';
 import { NavigationExtras, Router } from '@angular/router';
+import { Platform } from '@ionic/angular';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class ReportsPage implements OnInit {
   constructor(
     private router: Router,
     private file: File,
+    private platform: Platform,
     private data: DataService
   ) {
     
@@ -49,11 +51,23 @@ export class ReportsPage implements OnInit {
 
   /** PRIVATE METHODS */
 
-  private loadReports() {
+  private loadReports() {    
     this.data.getMainDirectory().then(main => {
       this.mainDirectory = main;
-      this.file.listDir(main.nativeURL, 'reports').then(entries => {
-        this.currentReports = entries.reverse();
+
+      // in case the main directory was just created, make sure the reports directory exists
+      this.file.checkDir(main.nativeURL, 'reports').then(exists => {
+        if (exists) {
+          this.file.listDir(main.nativeURL, 'reports').then(entries => {
+            this.currentReports = entries.reverse();
+          });
+        }
+
+      // if the reports directory does not exist, create it
+      }).catch(_ => {
+        this.file.createDir(main.nativeURL, 'reports', true).then(e => {
+          this.currentReports = [];
+        });
       });
     });
   }
