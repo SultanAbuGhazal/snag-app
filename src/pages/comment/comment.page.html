@@ -44,7 +44,7 @@
   <ion-row id="commentPhotosContainer" class="ion-padding-horizontal ion-justify-content-start">
     <!-- preview selected photographs -->
     <ion-col *ngFor="let photo of photographs; let i = index" size="4">
-      <ion-img [src]="photo.src"></ion-img>
+      <ion-img [src]="photo.src" style="margin-top: 3px;"></ion-img>
       <ion-button fill="clear" color="danger" class="delete-button" (click)="onDeletePhotoClick(i)">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>

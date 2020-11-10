@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { resolve } from 'dns';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 
@@ -19,6 +18,7 @@ export class ReportPreviewPage implements OnInit {
 
   @ViewChild('docContainer', {static: true}) docContainer: ElementRef;
   reportDirectory: DirectoryEntry;
+  reportPDF: any;
   source: any;
 
   constructor(
@@ -35,6 +35,7 @@ export class ReportPreviewPage implements OnInit {
   ngOnInit() {
     this.getDocumentDefinition().then(dd => {
       var pdfDocGenerator = pdfMake.createPdf(dd);
+      this.reportPDF = pdfDocGenerator;
       pdfDocGenerator.getDataUrl((dataUrl) => {
         this.source = dataUrl;
       });
@@ -63,7 +64,8 @@ export class ReportPreviewPage implements OnInit {
         ...(await this.getComments())
       ],
       images: {
-        testImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAH0BAMAAADh9GazAAAAG1BMVEXMzMyWlpacnJyqqqrFxcWxsbGjo6O3t7e+vr6He3KoAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFBElEQVR4nO3Zz2/aSBjG8df8MkeGFJKjabvbHKHbSj2aptu9Alr1DKtK6RG6Us7QXvbP3nlnxvY0IUkPrYZK349U/FCD9L7YMx47IgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4Ofpvxy+uZ0e9nXybH87pdQzbrM0xixupQd17cdGt1JSO9eIFuOradIRHeOsxffrG25SSrY03Rxcgftv0hH9uhGfLiROSbV9IxPzqjMzxTfpiLxupGXOyiszlDgldXCN9PVk6urP2qRjuuapmur3FnpS7eOU1MQ10nan/eYsTse063pnY9GJYhqnlLpmqY1kfngM43RMz5QhheFRxCml+TDTRnzhmS2zSceEubou3DyJUlKbC9fIzp1KPbONkrJzWmk3k+oAZeMQcn8qbc6jlJKtwjUyC5eQRZScpYbcVFVm1dhph0vIKEopvTWla8T/nvrjNslp6SnTqgfAfJRvhn9Lfcjs8WtSSrNzcY1M3HTbtzNWk5zcnMVz62G0MWa4197cfx3GUUpIB+o3jRRR8jam7Ji6yF11Fa/KH0YpIS3CN+LmnI42UifvYKbdZkZa+it7ab9Z6vv5MEoJLc/EN2JC+YMoeW1zMW8udjMzKv+c2Pdhfp6bKKXT0ap9I75ubaRO1WfGs+aishmWOkM88d9yX25SOm7CeeSI6NnUzKz/XIoOoPMTOyJupnlkjNgxcGf1YVdipzVG3Az1yKylK/ftre/thic2a5lg/FAjfXNn3XU43Uaq6/k6SkHP3Fmh24NYXc/HUUqnaaRaYU2jFOzu3sbagV2tsM6ilE7TyH2rX2sybi7snf9K3djT6NRWvxIGe3UXso+SZ+96l3VX4T7QnkbVXchFlBLLojtEEyfvrVnP65Hf9mkzqu8LB3FKK3v4nt2ufLv1FTEPRV+c3j17aOTepyhu5TupJuCO8UuU4gSfooRF0n3Ptdq6ZNnVzxFn5kX510TfntxzrdDIfU8aD3rKtOp1/Nzt1KJP7kljaKRdP/FtktroWdU31ZBxD4bNc42z+olvk5LKHnoan/sWNvUR0p3jUtPJPY0PvvPvI52V+T1cVU7t7yMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8CvKwr9f3i/WiBm+umfPrUYG9l1mjJGhSGugb62rybXIe/NRskJk8nMrfcSg88c9e4404l7He7kJjXR+K7/al3erMvsk+ebnV/uAgbyVl8+kVeY2dJ9OJVsNdNN+urR7s9Uz6W3tnqiR87Vch0baC//SnWY30tul7EMb6X58v2hv5/KvfHj3WrKPbvPhnf7Amd3VL+R13Mjgsl+ERlqlf+kUWWv/Je2AsqdWq+wU/elq+0ae298+K93muczt3szukmv7zw4mHR+ukZveNjSSVS+DLF9fp23EDnb3QxeX60KL1bp0M6jGyEC+tLcSH5HWZ7l7RORFkfiIaCX6s68/re1hcNXqJjoirVX4YGikO5K7Y0SWi+SN6BiR1fbzQm7KK61WN80Ykfw8fDA04t6412jWktQXHS3IzlpyKOel5JNLLUc3zawleRE+GDfiT78rU11HJHUj36G3TV3BD/I5dQE/SHaZugIAwHf4H0NwywsM0GI2AAAAAElFTkSuQmCC'
+        testImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAJYBAMAAAC+wq27AAAAG1BMVEXMzMyWlpacnJyqqqrFxcWxsbGjo6O3t7e+vr6He3KoAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFRUlEQVR4nO3ZS2/bOBSGYVKWL0tTbp0srV4mWcadFuhSTjKdWdrGoGt7ECBdOp1B1nEL9HcPD0lJTOpcFi3oAu8DRPocOQCPJF6kKAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwI81eFO8v5t26f5T/O3T1/Llzd2UUs+43cIYM7+TdshLe/RGUteG5+p2SurKFSKN8a1p0y6ncvRQktTrC25TSrlxhWylMe5Ut2mXtRwsbBiYuqQ2JdXxhZTmbT41k1tph74p/vtrbTZKZWZUnbmS2pTU1hUykJupK6e1TbtkZiW9aiV/N5eb6iZOSZWukI60Ta1HcdplW1RyNz5TajpWUtJJnFLqmoUUon33KOK0y9SNAmt7vUL3mMQppVmhpRDfcG2qKO1SPpPt8qhuuL02bUpqfegKuXK3Us/24jYJO6ZVdleGC5S7+070/a20PohSSrYVrpBpmELmUXIWEvrmoP56PV10whTyPEopnZrKFeLPp5zcNjmZ3DJZ3QG6zdgULpm9fm1KaXqgXCGlG24H9s5pk9M3o2hs7Zjqj/VY1lqZ/9V2HKWEpKPeKmQSJW9tqtzUjeyZgay1Nm0hRZQSkkb4QtyYk0shTfK25qTbjEhZ4dZaB/KXlfxiVkQpocVI+UJMaP4wSl7HHM6ayS4r1mElFsbnmYlSOm6K9oX4dkshTaq/M542k4o25qj6s7QdSJvwiyil4wacR66ILNKbkVUbvxw53LMr4kaaR/qI7QNt1q7M3Fa2X33EjVCPjFp2AA6zvPuun/zGezZqmWD8UCED0667djV/vwqp5/NVlIKeaVfoWdMf6vl8HKV02kLqFdZJlIKr6DG214xQ9QprFKV02kLuW/1a5biZ2GWJIjvbsfdt9atCZ6+fQm6i5Nmn3kVTVb+5jeqnkMMoJaajJ0QTJ+/UrGZNz8/92Z+OmufCYZzS0g8/s9uVb7edEd2Ylstia9+e2UMh975FcSvfshmAF/LyoSdXaO/eooRF0n3vtToyl181D4Yz81rWWvM9fK8VCrnvTeNWbpmsWce796n7+aYxFNJp3vi2SazlrhqYUfvZeiVp2rzxbVNS+qG38X1fwjp6VrfTTiVp797GB0/9/8i38rcwq+zb/0cAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/Cp0+Pnl/WKFmOLtPUfuFDK0n7QxRhVKZUP5aJ2Vl0p9MBdKT5Qqf25LHzHMf7/nyI5C3HZ8o65DIfnr6qvdnC8r/Un11z+/tQ8YqlP15qXKqr4N3RcnSi+Hsuu8WNijevlS9Tb2SFTIwUpdhkI6c7/pnuhr1btKWYcU0r34MO9sZupf9fH8ndIXbvfxXE6wtocGE/UuLmR4PJiEQrLKb/KJzm6+pO1Q9tbKqnwyOFlu3qtX9tzryu1eqZk9qu0hdWl/bGeS/uEKue5tQiG63gx1f3WZthDb2d2JnhyvJtJYaZfshnUfGaovnY2Kr0j2WX1/RdTRJPEVkZbIaV99WtnL4Foru+iKZMvwxVBI97n6vo+oxTx5IdJH1HLzea6uqzNprezaPqL6B+GLoRD3wW2jUUulnnSkQXbUUttqVql+eSzNkV07aqn+JHwxLsTffmemnkdU6kKeoLdJ3YIf5HPqBvwg+jh1CwAAT/A/xKPO9PPCMc4AAAAASUVORK5CYII=',
+        // testImage: '//placehold.it/200'
       },
       styles: this.getStyles()
     };
@@ -74,7 +76,12 @@ export class ReportPreviewPage implements OnInit {
 
 
   onExportClick() {
-    
+    if (this.source) {
+      this.reportPDF.print();
+      // this.file.writeFile(this.reportDirectory.nativeURL, 'report.pdf', this.source, {replace: true}).then(_ => {
+      //   console.log("exported!");
+      // });
+    }
   }
 
   
@@ -335,83 +342,75 @@ export class ReportPreviewPage implements OnInit {
 
 
 
-  private getComments(): Promise<[]> {
-    var promise: Promise<[]> = new Promise((resolve, reject) => {
-      var nodes: any = [];
+  /**
+   * This function prepares the comments nodes of all the zones
+   * 
+   */
+  private async getComments() {
+    var nodes = [];
 
-      this._getZoneEntries(this.reportDirectory).then(zones => {
-        for (let z = 0; z < zones.length; z++) {
-          nodes.push({
-            pageBreak: 'before',
-            text: (z+1).toString() + '. ' + zones[z].name,
-            headlineLevel: 2,
-            style: 'headlineLevel2',
-            tocItem: 'mainToc',
-            tocMargin: [20, 0, 0, 0]
-          });
-
-          for (let c = 0; c < 3; c++) {
-            nodes.push({
-              style: 'tableExample',
-              margin: [0, 0, 0, 10],
-              table: {
-                widths: ['*', '*', '*', '*', '*'],
-                body: [
-                  [{text: '#000'+(c+1).toString(), colSpan: 5, alignment: 'right', borderColor: '#ffffff', border: [false, false, false, 1]}, '', '', '', ''],
-                  [{text: 'There is a water leakage in the ceiling!\n\n', colSpan: 5, border: [false, false, false, false]}, '', '', '', ''],
-                  [
-                    {
-                        stack: [
-                            {text: '#000'+(c+1).toString()+'A', fontSize: 9, margin: [0, 2, 0, 0], alignment: 'left', style: {color: 'grey'}},
-                            {image: 'testImage', width: '95'},
-                            {text: 'Done [   ]', margin: [0, 2, 0, 0], alignment: 'right'}
-                        ],
-                        colSpan: 1, border: [0, false, false, false]
-                    },
-                    {
-                        stack: [
-                            {text: '#000'+(c+1).toString()+'A', fontSize: 9, margin: [0, 2, 0, 0], alignment: 'left', style: {color: 'grey'}},
-                            {image: 'testImage', width: '95'},
-                            {text: 'Done [   ]', margin: [0, 2, 0, 0], alignment: 'right'}
-                        ],
-                        colSpan: 1, border: [0, false, false, false]
-                    },
-                    {
-                        stack: [
-                            {text: '#000'+(c+1).toString()+'A', fontSize: 9, margin: [0, 2, 0, 0], alignment: 'left', style: {color: 'grey'}},
-                            {image: 'testImage', width: '95'},
-                            {text: 'Done [   ]', margin: [0, 2, 0, 0], alignment: 'right'}
-                        ],
-                        colSpan: 1, border: [0, false, false, false]
-                    },
-                    {
-                        stack: [
-                            {text: '#000'+(c+1).toString()+'A', fontSize: 9, margin: [0, 2, 0, 0], alignment: 'left', style: {color: 'grey'}},
-                            {image: 'testImage', width: '95'},
-                            {text: 'Done [   ]', margin: [0, 2, 0, 0], alignment: 'right'}
-                        ],
-                        colSpan: 1, border: [0, false, false, false]
-                    },
-                    {
-                        stack: [
-                            {text: '#000'+(c+1).toString()+'A', fontSize: 9, margin: [0, 2, 0, 0], alignment: 'left', style: {color: 'grey'}},
-                            {image: 'testImage', width: '95'},
-                            {text: 'Done [   ]', margin: [0, 2, 0, 0], alignment: 'right'}
-                        ],
-                        colSpan: 1, border: [0, false, false, false]
-                    },
-                  ]
-                ]
-              }
-            });
-          }
-        }
-    
-        resolve(nodes);  
+    // list and iterate through the zones
+    var zones = await this._getZoneEntries(this.reportDirectory);
+    for (let z = 0; z < zones.length; z++) {
+      nodes.push({
+        pageBreak: 'before',
+        text: (z+1).toString() + '. ' + zones[z].name,
+        headlineLevel: 2,
+        style: 'headlineLevel2',
+        tocItem: 'mainToc',
+        tocMargin: [20, 0, 0, 0]
       });
-    });
 
-    return promise;
+      // list and iterate through the comment of the current zone
+      var comments = await this._getCommentsByZone(this.reportDirectory, zones[z]);
+      for (let c = 0; c < comments.length; c++) {
+        var commentId = comments[c].id.toString().padStart(4, '0');
+        var photos: any[] = [[]];
+        var row = 0;
+
+        for (let p = 0; p < comments[c].photographs.length; p++) {
+          let uri = comments[c].photographs[p];
+          let filename = uri.substring(uri.lastIndexOf('/') + 1);
+          let path = uri.substring(0, uri.lastIndexOf('/') + 1);
+          var src = await this.file.readAsDataURL(path, filename);
+          var photoId = String.fromCharCode(65 + p);
+
+          if (p > 0 && p % 5 == 0) {
+            photos.push([]);
+            row++;
+          }
+
+          photos[row].push({
+            stack: [
+                {text: '#'+commentId+photoId, fontSize: 9, margin: [0, 2, 0, 0], alignment: 'left', style: {color: 'grey'}},
+                {image: src, width: 95},
+                {text: 'Done [   ]', margin: [0, 2, 0, 0], alignment: 'right'}
+            ],
+            colSpan: 1, border: [false, false, false, false]
+          });
+        }
+
+        while (photos[row].length < 5) {
+          photos[row].push({text: '', border: [false, false, false, false]});
+        }
+
+        nodes.push({
+          style: 'tableExample',
+          margin: [0, 0, 0, 10],
+          table: {
+            widths: ['*', '*', '*', '*', '*'],
+            body: [
+              [{text: '#'+commentId, colSpan: 5, alignment: 'right', borderColor: '#ffffff', border: [false, false, false, 1]}, '', '', '', ''],
+              [{text: comments[c].description+'\n\n', colSpan: 5, border: [false, false, false, false]}, '', '', '', ''],
+              ...photos
+            ]
+          }
+        });
+        // debugger;
+      }
+    }
+
+    return nodes;
   }
 
 
@@ -460,6 +459,12 @@ export class ReportPreviewPage implements OnInit {
 
 
 
+  private addImages() {
+
+  }
+
+
+
   private _getReportDetails(reportDirectory: DirectoryEntry) {
     return this.file.readAsText(reportDirectory.nativeURL, 'info.json').then(f => {
       var report = JSON.parse(f);
@@ -477,10 +482,24 @@ export class ReportPreviewPage implements OnInit {
 
 
 
-  private _getCommentEntriesByZone(reportDirectory: DirectoryEntry, zoneDirectory: DirectoryEntry) {
-    return this.file.listDir(reportDirectory.nativeURL + 'comments', zoneDirectory.name).then(commentsDirectories => {
-      return commentsDirectories;
+  private _getCommentsByZone(reportDirectory: DirectoryEntry, zoneDirectory: DirectoryEntry): any {
+    var promise = new Promise((resolve, reject) => {
+      this.file.listDir(reportDirectory.nativeURL + 'comments', zoneDirectory.name).then(commentsDirectories => {
+        var promises = [];
+
+        for (let c = 0; c < commentsDirectories.length; c++) {
+          promises.push(this.file.readAsText(commentsDirectories[c].nativeURL, 'details.json'));
+        }
+
+        Promise.all(promises).then(results => {
+          resolve(results.map(el => JSON.parse(el)));
+        });
+
+        return commentsDirectories;
+      });
     });
+    
+    return promise;
   }
 
 

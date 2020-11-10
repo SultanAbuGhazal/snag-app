@@ -343,8 +343,9 @@ export class CommentPage implements OnInit {
 
   private async openCamera() {
     const options: CameraOptions = {
-      quality: 100,
+      quality: 75,
       sourceType: null,
+      correctOrientation: false,
       destinationType: this.camera.DestinationType.FILE_URI,
       allowEdit: false,
       encodingType: this.camera.EncodingType.JPEG,
